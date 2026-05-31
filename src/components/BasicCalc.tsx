@@ -151,24 +151,24 @@ export default function BasicCalc() {
       
       {/* Title & Introduction */}
       <div className="text-center">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-neutral-900 dark:text-neutral-50 flex items-center justify-center gap-2">
-          <Calculator className="w-7 h-7 text-blue-600 dark:text-blue-400" />
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-neutral-900 flex items-center justify-center gap-2">
+          <Calculator className="w-7 h-7 text-blue-600" />
           Máy tính cơ bản
         </h1>
-        <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 mt-1 max-w-xs mx-auto">
+        <p className="text-xs sm:text-sm text-neutral-500 mt-1 max-w-xs mx-auto">
           Công cụ hỗ trợ các phép tính cơ học diễn ra nhanh chóng và chính xác tại quầy/kho bãi.
         </p>
       </div>
 
       {/* Main Card */}
-      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-sm rounded-2xl overflow-hidden p-3 sm:p-4 md:p-6">
+      <div className="bg-white border border-neutral-200 shadow-sm rounded-2xl overflow-hidden p-3 sm:p-4 md:p-6">
         
         {/* Digital Display Area */}
-        <div className="bg-neutral-50 dark:bg-neutral-800/60 rounded-xl p-3 sm:p-4 md:p-6 mb-4 flex flex-col items-end justify-end min-h-[88px] sm:min-h-[100px] border border-neutral-200/50 dark:border-neutral-700/50 shadow-inner-sm">
-          <div className="text-xs sm:text-sm text-neutral-400 dark:text-neutral-500 font-mono h-5 truncate max-w-full text-right select-none">
+        <div className="bg-neutral-50 rounded-xl p-3 sm:p-4 md:p-6 mb-4 flex flex-col items-end justify-end min-h-[88px] sm:min-h-[100px] border border-neutral-200/50 shadow-inner-sm">
+          <div className="text-xs sm:text-sm text-neutral-400 font-mono h-5 truncate max-w-full text-right select-none">
             {operation ? `${previousInput} ${operation}` : ''}
           </div>
-          <div className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-neutral-900 dark:text-neutral-50 tracking-tight font-mono break-all text-right select-all mt-2 w-full">
+          <div className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-neutral-900 tracking-tight font-mono break-all text-right select-all mt-2 w-full">
             {currentInput}
           </div>
         </div>
@@ -178,25 +178,25 @@ export default function BasicCalc() {
           {/* Row 1: AC, /, *, Back */}
           <button 
             onClick={clearDisplay}
-            className="h-12 bg-red-100 hover:bg-red-200 text-red-700 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-900/30"
+            className="h-12 bg-red-100 hover:bg-red-200 text-red-700 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center"
           >
             AC
           </button>
           <button 
             onClick={() => appendOperator('/')}
-            className="h-12 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
+            className="h-12 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center"
           >
             ÷
           </button>
           <button 
             onClick={() => appendOperator('*')}
-            className="h-12 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
+            className="h-12 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center"
           >
             ×
           </button>
           <button 
             onClick={deleteLast}
-            className="h-12 bg-neutral-100 hover:bg-neutral-200 text-neutral-600 rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
+            className="h-12 bg-neutral-100 hover:bg-neutral-200 text-neutral-600 rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center"
           >
             <Delete className="w-5 h-5" />
           </button>
@@ -204,25 +204,25 @@ export default function BasicCalc() {
           {/* Row 2: 7, 8, 9, - */}
           <button 
             onClick={() => appendNumber('7')}
-            className="h-12 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center dark:bg-neutral-800/40 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="h-12 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center"
           >
             7
           </button>
           <button 
             onClick={() => appendNumber('8')}
-            className="h-12 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center dark:bg-neutral-800/40 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="h-12 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center"
           >
             8
           </button>
           <button 
             onClick={() => appendNumber('9')}
-            className="h-12 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center dark:bg-neutral-800/40 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="h-12 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center"
           >
             9
           </button>
           <button 
             onClick={() => appendOperator('-')}
-            className="h-12 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
+            className="h-12 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center"
           >
             -
           </button>
@@ -230,25 +230,25 @@ export default function BasicCalc() {
           {/* Row 3: 4, 5, 6, + */}
           <button 
             onClick={() => appendNumber('4')}
-            className="h-12 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center dark:bg-neutral-800/40 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="h-12 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center"
           >
             4
           </button>
           <button 
             onClick={() => appendNumber('5')}
-            className="h-12 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center dark:bg-neutral-800/40 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="h-12 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center"
           >
             5
           </button>
           <button 
             onClick={() => appendNumber('6')}
-            className="h-12 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center dark:bg-neutral-800/40 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="h-12 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center"
           >
             6
           </button>
           <button 
             onClick={() => appendOperator('+')}
-            className="h-12 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
+            className="h-12 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center"
           >
             +
           </button>
@@ -257,19 +257,19 @@ export default function BasicCalc() {
           <div className="col-span-3 grid grid-cols-3 gap-2.5">
             <button 
               onClick={() => appendNumber('1')}
-              className="h-12 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center dark:bg-neutral-800/40 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              className="h-12 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center"
             >
               1
             </button>
             <button 
               onClick={() => appendNumber('2')}
-              className="h-12 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center dark:bg-neutral-800/40 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              className="h-12 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center"
             >
               2
             </button>
             <button 
               onClick={() => appendNumber('3')}
-              className="h-12 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center dark:bg-neutral-800/40 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              className="h-12 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center"
             >
               3
             </button>
@@ -285,13 +285,13 @@ export default function BasicCalc() {
           {/* Row 5: 0 (span 2), . */}
           <button 
             onClick={() => appendNumber('0')}
-            className="col-span-2 h-12 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center dark:bg-neutral-800/40 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="col-span-2 h-12 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center"
           >
             0
           </button>
           <button 
             onClick={() => appendNumber('.')}
-            className="h-12 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center dark:bg-neutral-800/40 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="h-12 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 font-bold text-sm rounded-lg active:scale-95 transition-all cursor-pointer flex items-center justify-center"
           >
             .
           </button>

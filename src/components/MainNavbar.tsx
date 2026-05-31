@@ -1,13 +1,11 @@
 import { useState, type ReactNode } from 'react';
-import { Menu, Calendar, Calculator, HelpCircle, Moon, Sun } from 'lucide-react';
+import { Menu, Calendar, Calculator, HelpCircle } from 'lucide-react';
 
 type TabId = 'shelfLife' | 'basic' | 'support';
 
 interface MainNavbarProps {
   activeTab: TabId;
   setActiveTab: (tab: TabId) => void;
-  isDarkMode: boolean;
-  setIsDarkMode: (value: boolean) => void;
 }
 
 const APP_NAME = 'I.C.A.T';
@@ -25,8 +23,6 @@ const NAV_ITEMS: Array<{
 export default function MainNavbar({
   activeTab,
   setActiveTab,
-  isDarkMode,
-  setIsDarkMode,
 }: MainNavbarProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -38,19 +34,19 @@ export default function MainNavbar({
   const navButtonClass = (tab: TabId) =>
     `px-3 py-1 font-semibold text-sm transition-all cursor-pointer relative ${
       activeTab === tab
-        ? 'text-blue-600 dark:text-blue-400'
-        : 'text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100'
+        ? 'text-blue-600'
+        : 'text-neutral-500 hover:text-neutral-900'
     }`;
 
   const mobileItemClass = (tab: TabId) =>
     `flex items-center gap-3 w-full text-left px-4 py-3 text-sm font-semibold transition-colors ${
       activeTab === tab
-        ? 'bg-neutral-100 dark:bg-neutral-800/80 text-blue-600 dark:text-blue-400'
-        : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
+        ? 'bg-neutral-100 text-blue-600'
+        : 'text-neutral-700 hover:bg-neutral-50'
     }`;
 
   return (
-    <nav className="bg-white dark:bg-neutral-900 w-full sticky top-0 border-b border-neutral-200 dark:border-neutral-800 shadow-xs z-50 transition-colors">
+    <nav className="bg-white w-full sticky top-0 border-b border-neutral-200 shadow-xs z-50 transition-colors">
       <div className="flex justify-between items-center px-4 md:px-8 py-4 max-w-7xl mx-auto">
         <div className="flex items-center gap-8">
           <button
@@ -58,7 +54,7 @@ export default function MainNavbar({
             className="flex items-center gap-2 cursor-pointer select-none"
             onClick={() => setActiveTab('shelfLife')}
           >
-            <span className="font-sans font-black text-2xl sm:text-3xl text-blue-600 dark:text-blue-500 tracking-tight">
+            <span className="font-sans font-black text-2xl sm:text-3xl text-blue-600 tracking-tight">
               {APP_NAME}
             </span>
           </button>
@@ -72,7 +68,7 @@ export default function MainNavbar({
               >
                 {item.label}
                 {activeTab === item.id && (
-                  <span className="absolute bottom-[-17px] left-0 right-0 h-[2.5px] bg-blue-600 dark:bg-blue-400 rounded-full" />
+                  <span className="absolute bottom-[-17px] left-0 right-0 h-[2.5px] bg-blue-600 rounded-full" />
                 )}
               </button>
             ))}
@@ -80,18 +76,10 @@ export default function MainNavbar({
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className="p-2 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors cursor-pointer"
-            title="Đổi chủ đề giao diện"
-          >
-            {isDarkMode ? <Sun className="w-5 h-5 text-yellow-500" /> : <Moon className="w-5 h-5" />}
-          </button>
-
           <div className="relative inline-block text-left">
             <button
               onClick={() => setDropdownOpen((value) => !value)}
-              className="p-2 md:hidden hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors flex items-center justify-center text-neutral-600 dark:text-neutral-300"
+              className="p-2 md:hidden hover:bg-neutral-100 rounded-lg transition-colors flex items-center justify-center text-neutral-600"
               aria-label="Menu"
             >
               <Menu className="w-6 h-6" />
@@ -104,7 +92,7 @@ export default function MainNavbar({
                   onClick={() => setDropdownOpen(false)}
                 />
                 <div
-                  className="absolute right-0 z-20 mt-2 w-56 origin-top-right rounded-xl bg-white dark:bg-neutral-900 shadow-lg border border-neutral-200 dark:border-neutral-800/80 focus:outline-none divide-y divide-neutral-100 dark:divide-neutral-800"
+                  className="absolute right-0 z-20 mt-2 w-56 origin-top-right rounded-xl bg-white shadow-lg border border-neutral-200 focus:outline-none divide-y divide-neutral-100"
                   role="menu"
                 >
                   <div className="py-2.5">
