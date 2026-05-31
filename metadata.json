@@ -1,0 +1,6 @@
+{
+  "name": "ShelfLife Pro",
+  "description": "Cung cấp máy tính hạn sử dụng chuyên nghiệp (NSX & HSD) và máy tính cơ bản hỗ trợ đắc lực cho kho hàng.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
