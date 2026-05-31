@@ -41,19 +41,6 @@ const parseDateStr = (dateStr: string): Date | null => {
 const formatDisplayDate = (date: Date) =>
   `${pad2(date.getDate())}/${pad2(date.getMonth() + 1)}/${date.getFullYear()}`;
 
-const isIOSDevice = () => {
-  if (typeof navigator === "undefined") return false;
-
-  const platform = navigator.platform || "";
-  const userAgent = navigator.userAgent || "";
-
-  return (
-    /iPad|iPhone|iPod/.test(platform) ||
-    /iPad|iPhone|iPod/.test(userAgent) ||
-    (platform === "MacIntel" && navigator.maxTouchPoints > 1)
-  );
-};
-
 const MONTH_LABELS = [
   "01",
   "02",
@@ -157,7 +144,6 @@ function DatePickerField({
   onChange: (value: string) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [isIOS] = useState(() => isIOSDevice());
 
   const selectedDate = parseDateStr(value);
 
@@ -174,12 +160,11 @@ function DatePickerField({
   const wheelDaysInMonth = new Date(wheelYearNumber, wheelMonthNumber, 0).getDate();
 
   useEffect(() => {
-    if (isIOS) return;
     const nextDate = parseDateStr(value) ?? new Date();
     setWheelDay(pad2(nextDate.getDate()));
     setWheelMonth(pad2(nextDate.getMonth() + 1));
     setWheelYear(String(nextDate.getFullYear()));
-  }, [value, isIOS]);
+  }, [value]);
 
   useEffect(() => {
     if (!open) return;
@@ -198,32 +183,6 @@ function DatePickerField({
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [open]);
-
-  if (isIOS) {
-    return (
-      <div className="w-full">
-        <div className="rounded-lg border border-neutral-300 bg-white px-4 py-3 shadow-inner-sm">
-          <div className="mb-2 flex items-center gap-3">
-            <Calendar className="h-4 w-4 flex-shrink-0 text-blue-500" />
-            <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">
-                {label}
-              </p>
-              <p className="text-xs text-neutral-500">
-                Chọn ngày bằng bộ cuộn iOS
-              </p>
-            </div>
-          </div>
-          <input
-            type="date"
-            value={value}
-            onChange={(event) => onChange(event.target.value)}
-            className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 font-mono text-sm text-neutral-800 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-          />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="w-full">
