@@ -5,8 +5,6 @@ import { TimeUnit, ShelfLifeResult } from "../types";
 const IMPORTED_THRESHOLD = 50;
 const DOMESTIC_THRESHOLD = 70;
 
-const WEEKDAY_LABELS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
-
 const pad2 = (value: number) => String(value).padStart(2, "0");
 
 const toDateStr = (date: Date) =>
@@ -40,15 +38,114 @@ const parseDateStr = (dateStr: string): Date | null => {
   return parsed;
 };
 
-const startOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1);
-
-const addMonths = (date: Date, amount: number) =>
-  new Date(date.getFullYear(), date.getMonth() + amount, 1);
-
 const formatDisplayDate = (date: Date) =>
   `${pad2(date.getDate())}/${pad2(date.getMonth() + 1)}/${date.getFullYear()}`;
 
-const formatMonthTitle = (date: Date) => `Tháng ${date.getMonth() + 1}, ${date.getFullYear()}`;
+const isIOSDevice = () => {
+  if (typeof navigator === "undefined") return false;
+
+  const platform = navigator.platform || "";
+  const userAgent = navigator.userAgent || "";
+
+  return (
+    /iPad|iPhone|iPod/.test(platform) ||
+    /iPad|iPhone|iPod/.test(userAgent) ||
+    (platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+};
+
+const MONTH_LABELS = [
+  "01",
+  "02",
+  "03",
+  "04",
+  "05",
+  "06",
+  "07",
+  "08",
+  "09",
+  "10",
+  "11",
+  "12",
+];
+
+const MIN_WHEEL_YEAR = 1950;
+const MAX_WHEEL_YEAR = 2050;
+const WHEEL_ITEM_HEIGHT = 44;
+
+const clamp = (value: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, value));
+
+function WheelColumn({
+  label,
+  items,
+  value,
+  onChange,
+}: {
+  label: string;
+  items: string[];
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const index = Math.max(0, items.indexOf(value));
+    container.scrollTo({ top: index * WHEEL_ITEM_HEIGHT, behavior: "auto" });
+  }, [items, value]);
+
+  const handleScroll = () => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const rawIndex = Math.round(container.scrollTop / WHEEL_ITEM_HEIGHT);
+    const index = clamp(rawIndex, 0, items.length - 1);
+    const nextValue = items[index];
+
+    if (nextValue !== value) {
+      onChange(nextValue);
+    }
+  };
+
+  return (
+    <div className="min-w-0">
+      <p className="mb-2 text-center text-[10px] font-bold uppercase tracking-widest text-neutral-400">
+        {label}
+      </p>
+      <div className="relative">
+        <div
+          ref={containerRef}
+          onScroll={handleScroll}
+          className="h-56 overflow-y-auto rounded-2xl border border-neutral-200 bg-neutral-50 py-[88px] shadow-inner-sm"
+        >
+          {items.map((item) => {
+            const active = item === value;
+
+            return (
+              <button
+                key={item}
+                type="button"
+                onClick={() => onChange(item)}
+                className={`flex h-11 w-full items-center justify-center text-sm font-semibold transition-colors ${
+                  active
+                    ? "text-blue-700"
+                    : "text-neutral-700 hover:bg-white"
+                }`}
+              >
+                {item}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="pointer-events-none absolute left-2 right-2 top-1/2 h-11 -translate-y-1/2 rounded-xl border-y border-blue-200/80 bg-blue-50/40" />
+      </div>
+    </div>
+  );
+}
 
 function DatePickerField({
   label,
@@ -60,51 +157,61 @@ function DatePickerField({
   onChange: (value: string) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [viewMonth, setViewMonth] = useState<Date>(() => {
-    const initial = parseDateStr(value) ?? new Date();
-    return startOfMonth(initial);
-  });
-
-  useEffect(() => {
-    if (!open) return;
-
-    const nextDate = parseDateStr(value) ?? new Date();
-    setViewMonth(startOfMonth(nextDate));
-  }, [open, value]);
-
-  useEffect(() => {
-    if (!open) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setOpen(false);
-      }
-    };
-
-    document.body.style.overflow = "hidden";
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = "";
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [open]);
+  const [isIOS] = useState(() => isIOSDevice());
 
   const selectedDate = parseDateStr(value);
-  const monthStart = startOfMonth(viewMonth);
-  const monthEnd = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 0);
-  const leadingBlankCount = (monthStart.getDay() + 6) % 7;
 
-  const days = Array.from({ length: monthEnd.getDate() }, (_, index) => {
-    const dayNumber = index + 1;
-    return new Date(viewMonth.getFullYear(), viewMonth.getMonth(), dayNumber);
-  });
+  const initialWheelDate = selectedDate ?? new Date();
+  const [wheelDay, setWheelDay] = useState(pad2(initialWheelDate.getDate()));
+  const [wheelMonth, setWheelMonth] = useState(pad2(initialWheelDate.getMonth() + 1));
+  const [wheelYear, setWheelYear] = useState(String(initialWheelDate.getFullYear()));
+  const wheelYearItems = Array.from(
+    { length: MAX_WHEEL_YEAR - MIN_WHEEL_YEAR + 1 },
+    (_, index) => String(MIN_WHEEL_YEAR + index),
+  );
+  const wheelMonthNumber = Number(wheelMonth);
+  const wheelYearNumber = Number(wheelYear);
+  const wheelDaysInMonth = new Date(wheelYearNumber, wheelMonthNumber, 0).getDate();
+
+  useEffect(() => {
+    if (isIOS) return;
+    const nextDate = parseDateStr(value) ?? new Date();
+    setWheelDay(pad2(nextDate.getDate()));
+    setWheelMonth(pad2(nextDate.getMonth() + 1));
+    setWheelYear(String(nextDate.getFullYear()));
+  }, [value, isIOS]);
+
+  if (isIOS) {
+    return (
+      <div className="w-full">
+        <div className="rounded-lg border border-neutral-300 bg-white px-4 py-3 shadow-inner-sm">
+          <div className="mb-2 flex items-center gap-3">
+            <Calendar className="h-4 w-4 flex-shrink-0 text-blue-500" />
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">
+                {label}
+              </p>
+              <p className="text-xs text-neutral-500">
+                Chọn ngày bằng bộ cuộn iOS
+              </p>
+            </div>
+          </div>
+          <input
+            type="date"
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 font-mono text-sm text-neutral-800 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <>
+    <div className="w-full">
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => setOpen((current) => !current)}
         className="flex h-12 w-full items-center justify-between gap-3 rounded-lg border border-neutral-300 bg-white px-4 text-left text-neutral-800 shadow-inner-sm transition-all hover:border-blue-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
       >
         <div className="min-w-0 flex items-center gap-3">
@@ -126,109 +233,110 @@ function DatePickerField({
       </button>
 
       {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/25 p-3 sm:items-center sm:p-6"
-          onClick={() => setOpen(false)}
-        >
-          <div
-            className="w-full max-w-sm overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-2xl"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-3 border-b border-neutral-100 px-4 py-4">
-              <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-400">
-                  {label}
-                </p>
-                <h3 className="mt-1 text-lg font-bold text-neutral-900">
-                  {formatMonthTitle(viewMonth)}
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="flex h-9 w-9 items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-800"
-                aria-label="Đóng"
-              >
-                ×
-              </button>
+        <div className="mt-3 rounded-2xl border border-neutral-200 bg-white shadow-sm overflow-hidden">
+          <div className="flex items-start justify-between gap-3 border-b border-neutral-100 px-4 py-4">
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-400">
+                {label}
+              </p>
+              <h3 className="mt-1 text-lg font-bold text-neutral-900">
+                Chọn ngày
+              </h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="flex h-9 w-9 items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-800"
+              aria-label="Đóng"
+            >
+              ×
+            </button>
+          </div>
+
+          <div className="px-4 pb-4 pt-3">
+            <div className="grid grid-cols-3 gap-2">
+              <WheelColumn
+                label="Ngày"
+                items={Array.from({ length: wheelDaysInMonth }, (_, index) =>
+                  pad2(index + 1),
+                )}
+                value={wheelDay}
+                onChange={(nextDay) => {
+                  const nextDayNumber = Number(nextDay);
+                  const safeDay = clamp(nextDayNumber, 1, wheelDaysInMonth);
+                  const nextValue = toDateStr(
+                    new Date(wheelYearNumber, wheelMonthNumber - 1, safeDay),
+                  );
+
+                  setWheelDay(pad2(safeDay));
+                  onChange(nextValue);
+                }}
+              />
+
+              <WheelColumn
+                label="Tháng"
+                items={MONTH_LABELS}
+                value={wheelMonth}
+                onChange={(nextMonth) => {
+                  const nextMonthNumber = Number(nextMonth);
+                  const maxDay = new Date(wheelYearNumber, nextMonthNumber, 0).getDate();
+                  const safeDay = clamp(Number(wheelDay), 1, maxDay);
+                  const nextValue = toDateStr(
+                    new Date(wheelYearNumber, nextMonthNumber - 1, safeDay),
+                  );
+
+                  setWheelMonth(nextMonth);
+                  setWheelDay(pad2(safeDay));
+                  onChange(nextValue);
+                }}
+              />
+
+              <WheelColumn
+                label="Năm"
+                items={wheelYearItems}
+                value={wheelYear}
+                onChange={(nextYear) => {
+                  const nextYearNumber = Number(nextYear);
+                  const maxDay = new Date(nextYearNumber, wheelMonthNumber, 0).getDate();
+                  const safeDay = clamp(Number(wheelDay), 1, maxDay);
+                  const nextValue = toDateStr(
+                    new Date(nextYearNumber, wheelMonthNumber - 1, safeDay),
+                  );
+
+                  setWheelYear(nextYear);
+                  setWheelDay(pad2(safeDay));
+                  onChange(nextValue);
+                }}
+              />
             </div>
 
-            <div className="flex items-center justify-between gap-2 px-4 py-3">
-              <button
-                type="button"
-                onClick={() => setViewMonth((current) => addMonths(current, -1))}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-neutral-700 transition-colors hover:bg-neutral-50"
-                aria-label="Tháng trước"
-              >
-                ‹
-              </button>
-
+            <div className="mt-4 flex gap-2">
               <button
                 type="button"
                 onClick={() => {
                   const today = new Date();
-                  onChange(toDateStr(today));
-                  setViewMonth(startOfMonth(today));
-                  setOpen(false);
+                  const todayValue = toDateStr(today);
+                  setWheelDay(pad2(today.getDate()));
+                  setWheelMonth(pad2(today.getMonth() + 1));
+                  setWheelYear(String(today.getFullYear()));
+                  onChange(todayValue);
                 }}
-                className="rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100"
+                className="flex-1 rounded-full bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100"
               >
                 Hôm nay
               </button>
-
               <button
                 type="button"
-                onClick={() => setViewMonth((current) => addMonths(current, 1))}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-neutral-700 transition-colors hover:bg-neutral-50"
-                aria-label="Tháng sau"
+                onClick={() => setOpen(false)}
+                className="flex-1 rounded-full border border-neutral-200 bg-white px-4 py-3 text-sm font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
               >
-                ›
+                Xong
               </button>
-            </div>
-
-            <div className="px-4 pb-4">
-              <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold uppercase tracking-widest text-neutral-400">
-                {WEEKDAY_LABELS.map((dayLabel) => (
-                  <div key={dayLabel} className="py-1">
-                    {dayLabel}
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-2 grid grid-cols-7 gap-1">
-                {Array.from({ length: leadingBlankCount }).map((_, index) => (
-                  <div key={`empty-${index}`} className="h-10" />
-                ))}
-
-                {days.map((day) => {
-                  const dayStr = toDateStr(day);
-                  const isSelected = selectedDate ? toDateStr(selectedDate) === dayStr : false;
-
-                  return (
-                    <button
-                      key={dayStr}
-                      type="button"
-                      onClick={() => {
-                        onChange(dayStr);
-                        setViewMonth(startOfMonth(day));
-                        setOpen(false);
-                      }}
-                      className={`h-10 rounded-xl text-sm font-semibold transition-all ${
-                        isSelected
-                          ? "bg-blue-600 text-white shadow-md"
-                          : "bg-neutral-50 text-neutral-800 hover:bg-blue-50 hover:text-blue-700"
-                      }`}
-                    >
-                      {day.getDate()}
-                    </button>
-                  );
-                })}
-              </div>
             </div>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
 
@@ -508,7 +616,7 @@ export default function ShelfLifeCalc({
 
                 {nsxMode === "specific" ? (
                   <DatePickerField
-                    label=""
+                    label="Ngày sản xuất"
                     value={nsxSpecific}
                     onChange={setNsxSpecific}
                   />
@@ -580,7 +688,7 @@ export default function ShelfLifeCalc({
 
                 {hsdMode === "specific" ? (
                   <DatePickerField
-                    label=""
+                    label="Hạn sử dụng"
                     value={hsdSpecific}
                     onChange={setHsdSpecific}
                   />
