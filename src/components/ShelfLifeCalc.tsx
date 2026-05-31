@@ -5,6 +5,233 @@ import { TimeUnit, ShelfLifeResult } from "../types";
 const IMPORTED_THRESHOLD = 50;
 const DOMESTIC_THRESHOLD = 70;
 
+const WEEKDAY_LABELS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+
+const pad2 = (value: number) => String(value).padStart(2, "0");
+
+const toDateStr = (date: Date) =>
+  `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+
+const parseDateStr = (dateStr: string): Date | null => {
+  if (!dateStr) return null;
+
+  const [yearStr, monthStr, dayStr] = dateStr.split("-");
+  const year = Number(yearStr);
+  const month = Number(monthStr);
+  const day = Number(dayStr);
+
+  if (
+    !Number.isFinite(year) ||
+    !Number.isFinite(month) ||
+    !Number.isFinite(day)
+  ) {
+    return null;
+  }
+
+  const parsed = new Date(year, month - 1, day);
+  if (
+    parsed.getFullYear() !== year ||
+    parsed.getMonth() !== month - 1 ||
+    parsed.getDate() !== day
+  ) {
+    return null;
+  }
+
+  return parsed;
+};
+
+const startOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1);
+
+const addMonths = (date: Date, amount: number) =>
+  new Date(date.getFullYear(), date.getMonth() + amount, 1);
+
+const formatDisplayDate = (date: Date) =>
+  `${pad2(date.getDate())}/${pad2(date.getMonth() + 1)}/${date.getFullYear()}`;
+
+const formatMonthTitle = (date: Date) => `Tháng ${date.getMonth() + 1}, ${date.getFullYear()}`;
+
+function DatePickerField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [viewMonth, setViewMonth] = useState<Date>(() => {
+    const initial = parseDateStr(value) ?? new Date();
+    return startOfMonth(initial);
+  });
+
+  useEffect(() => {
+    if (!open) return;
+
+    const nextDate = parseDateStr(value) ?? new Date();
+    setViewMonth(startOfMonth(nextDate));
+  }, [open, value]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
+    };
+
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = "";
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open]);
+
+  const selectedDate = parseDateStr(value);
+  const monthStart = startOfMonth(viewMonth);
+  const monthEnd = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 0);
+  const leadingBlankCount = (monthStart.getDay() + 6) % 7;
+
+  const days = Array.from({ length: monthEnd.getDate() }, (_, index) => {
+    const dayNumber = index + 1;
+    return new Date(viewMonth.getFullYear(), viewMonth.getMonth(), dayNumber);
+  });
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="flex h-12 w-full items-center justify-between gap-3 rounded-lg border border-neutral-300 bg-white px-4 text-left text-neutral-800 shadow-inner-sm transition-all hover:border-blue-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+      >
+        <div className="min-w-0 flex items-center gap-3">
+          <Calendar className="h-4 w-4 flex-shrink-0 text-blue-500" />
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">
+              {label}
+            </p>
+            <p
+              className={`truncate font-mono text-sm ${
+                selectedDate ? "text-neutral-800" : "text-neutral-400"
+              }`}
+            >
+              {selectedDate ? formatDisplayDate(selectedDate) : "Chọn ngày"}
+            </p>
+          </div>
+        </div>
+        <span className="text-neutral-400">▾</span>
+      </button>
+
+      {open && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/25 p-3 sm:items-center sm:p-6"
+          onClick={() => setOpen(false)}
+        >
+          <div
+            className="w-full max-w-sm overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3 border-b border-neutral-100 px-4 py-4">
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-400">
+                  {label}
+                </p>
+                <h3 className="mt-1 text-lg font-bold text-neutral-900">
+                  {formatMonthTitle(viewMonth)}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="flex h-9 w-9 items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-800"
+                aria-label="Đóng"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between gap-2 px-4 py-3">
+              <button
+                type="button"
+                onClick={() => setViewMonth((current) => addMonths(current, -1))}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-neutral-700 transition-colors hover:bg-neutral-50"
+                aria-label="Tháng trước"
+              >
+                ‹
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const today = new Date();
+                  onChange(toDateStr(today));
+                  setViewMonth(startOfMonth(today));
+                  setOpen(false);
+                }}
+                className="rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100"
+              >
+                Hôm nay
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setViewMonth((current) => addMonths(current, 1))}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-neutral-700 transition-colors hover:bg-neutral-50"
+                aria-label="Tháng sau"
+              >
+                ›
+              </button>
+            </div>
+
+            <div className="px-4 pb-4">
+              <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold uppercase tracking-widest text-neutral-400">
+                {WEEKDAY_LABELS.map((dayLabel) => (
+                  <div key={dayLabel} className="py-1">
+                    {dayLabel}
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-2 grid grid-cols-7 gap-1">
+                {Array.from({ length: leadingBlankCount }).map((_, index) => (
+                  <div key={`empty-${index}`} className="h-10" />
+                ))}
+
+                {days.map((day) => {
+                  const dayStr = toDateStr(day);
+                  const isSelected = selectedDate ? toDateStr(selectedDate) === dayStr : false;
+
+                  return (
+                    <button
+                      key={dayStr}
+                      type="button"
+                      onClick={() => {
+                        onChange(dayStr);
+                        setViewMonth(startOfMonth(day));
+                        setOpen(false);
+                      }}
+                      className={`h-10 rounded-xl text-sm font-semibold transition-all ${
+                        isSelected
+                          ? "bg-blue-600 text-white shadow-md"
+                          : "bg-neutral-50 text-neutral-800 hover:bg-blue-50 hover:text-blue-700"
+                      }`}
+                    >
+                      {day.getDate()}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 interface ShelfLifeCalcProps {
   currentDateStr: string;
 }
@@ -30,9 +257,8 @@ export default function ShelfLifeCalc({
 
   // Formatted date string for system date display
   const formatVietnameseDateStr = (dateStr: string) => {
-    if (!dateStr) return "";
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return dateStr;
+    const date = parseDateStr(dateStr);
+    if (!date) return dateStr;
     const day = date.getDate();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
@@ -74,35 +300,50 @@ export default function ShelfLifeCalc({
   const calculate = () => {
     try {
       setErrorMessage("");
-      const currentDate = new Date(currentDateStr);
-      if (isNaN(currentDate.getTime())) {
+      const currentDate = parseDateStr(currentDateStr);
+      if (!currentDate) {
         setErrorMessage("Ngày hiện tại hệ thống không hợp lệ.");
         return;
       }
 
-      let nsxDate = new Date();
-      let hsdDate = new Date();
+      let nsxDate = currentDate;
+      let hsdDate = currentDate;
 
       if (nsxMode === "specific" && hsdMode === "specific") {
-        nsxDate = new Date(nsxSpecific);
-        hsdDate = new Date(hsdSpecific);
+        const parsedNsx = parseDateStr(nsxSpecific);
+        const parsedHsd = parseDateStr(hsdSpecific);
+        if (!parsedNsx || !parsedHsd) {
+          setErrorMessage(
+            "Vui lòng kiểm tra lại tính chính xác của các ngày nhập liệu.",
+          );
+          return;
+        }
+        nsxDate = parsedNsx;
+        hsdDate = parsedHsd;
       } else if (nsxMode === "specific" && hsdMode === "relative") {
-        nsxDate = new Date(nsxSpecific);
+        const parsedNsx = parseDateStr(nsxSpecific);
+        if (!parsedNsx) {
+          setErrorMessage(
+            "Vui lòng kiểm tra lại tính chính xác của các ngày nhập liệu.",
+          );
+          return;
+        }
+        nsxDate = parsedNsx;
         hsdDate = addTime(nsxDate, hsdRelativeVal, hsdRelativeUnit);
       } else if (nsxMode === "relative" && hsdMode === "specific") {
-        hsdDate = new Date(hsdSpecific);
+        const parsedHsd = parseDateStr(hsdSpecific);
+        if (!parsedHsd) {
+          setErrorMessage(
+            "Vui lòng kiểm tra lại tính chính xác của các ngày nhập liệu.",
+          );
+          return;
+        }
+        hsdDate = parsedHsd;
         nsxDate = subtractTime(hsdDate, nsxRelativeVal, nsxRelativeUnit);
       } else {
         // Both relative: resolve NSX relative to Today, then HSD from NSX
         nsxDate = subtractTime(currentDate, nsxRelativeVal, nsxRelativeUnit);
         hsdDate = addTime(nsxDate, hsdRelativeVal, hsdRelativeUnit);
-      }
-
-      if (isNaN(nsxDate.getTime()) || isNaN(hsdDate.getTime())) {
-        setErrorMessage(
-          "Vui lòng kiểm tra lại tính chính xác của các ngày nhập liệu.",
-        );
-        return;
       }
 
       const totalDays = getDaysDiff(hsdDate, nsxDate);
@@ -266,15 +507,11 @@ export default function ShelfLifeCalc({
                 </div>
 
                 {nsxMode === "specific" ? (
-                  <div className="relative">
-                    <Calendar className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-500" />
-                    <input
-                      type="date"
-                      value={nsxSpecific}
-                      onChange={(e) => setNsxSpecific(e.target.value)}
-                      className="w-full h-12 pl-11 pr-4 rounded-lg border border-neutral-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all text-neutral-800 bg-white font-mono shadow-inner-sm text-sm"
-                    />
-                  </div>
+                  <DatePickerField
+                    label=""
+                    value={nsxSpecific}
+                    onChange={setNsxSpecific}
+                  />
                 ) : (
                   <div>
                     <div className="flex gap-2">
@@ -342,15 +579,11 @@ export default function ShelfLifeCalc({
                 </div>
 
                 {hsdMode === "specific" ? (
-                  <div className="relative">
-                    <Calendar className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-500" />
-                    <input
-                      type="date"
-                      value={hsdSpecific}
-                      onChange={(e) => setHsdSpecific(e.target.value)}
-                      className="w-full h-12 pl-11 pr-4 rounded-lg border border-neutral-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all text-neutral-800 bg-white font-mono shadow-inner-sm text-sm"
-                    />
-                  </div>
+                  <DatePickerField
+                    label=""
+                    value={hsdSpecific}
+                    onChange={setHsdSpecific}
+                  />
                 ) : (
                   <div>
                     <div className="flex gap-2">
