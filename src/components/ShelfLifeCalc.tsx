@@ -115,12 +115,12 @@ function WheelColumn({
       <p className="mb-2 text-center text-[10px] font-bold uppercase tracking-widest text-neutral-400">
         {label}
       </p>
-      <div className="relative">
-        <div
-          ref={containerRef}
-          onScroll={handleScroll}
-          className="h-56 overflow-y-auto rounded-2xl border border-neutral-200 bg-neutral-50 py-[88px] shadow-inner-sm"
-        >
+        <div className="relative">
+          <div
+            ref={containerRef}
+            onScroll={handleScroll}
+            className="h-56 overflow-y-auto wheel-scrollbar-hide rounded-2xl border border-neutral-200 bg-neutral-50 py-[88px] shadow-inner-sm"
+          >
           {items.map((item) => {
             const active = item === value;
 
@@ -181,6 +181,24 @@ function DatePickerField({
     setWheelYear(String(nextDate.getFullYear()));
   }, [value, isIOS]);
 
+  useEffect(() => {
+    if (!open) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
+    };
+
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = "";
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open]);
+
   if (isIOS) {
     return (
       <div className="w-full">
@@ -233,105 +251,113 @@ function DatePickerField({
       </button>
 
       {open && (
-        <div className="mt-3 rounded-2xl border border-neutral-200 bg-white shadow-sm overflow-hidden">
-          <div className="flex items-start justify-between gap-3 border-b border-neutral-100 px-4 py-4">
-            <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-400">
-                {label}
-              </p>
-              <h3 className="mt-1 text-lg font-bold text-neutral-900">
-                Chọn ngày
-              </h3>
-            </div>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="flex h-9 w-9 items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-800"
-              aria-label="Đóng"
-            >
-              ×
-            </button>
-          </div>
-
-          <div className="px-4 pb-4 pt-3">
-            <div className="grid grid-cols-3 gap-2">
-              <WheelColumn
-                label="Ngày"
-                items={Array.from({ length: wheelDaysInMonth }, (_, index) =>
-                  pad2(index + 1),
-                )}
-                value={wheelDay}
-                onChange={(nextDay) => {
-                  const nextDayNumber = Number(nextDay);
-                  const safeDay = clamp(nextDayNumber, 1, wheelDaysInMonth);
-                  const nextValue = toDateStr(
-                    new Date(wheelYearNumber, wheelMonthNumber - 1, safeDay),
-                  );
-
-                  setWheelDay(pad2(safeDay));
-                  onChange(nextValue);
-                }}
-              />
-
-              <WheelColumn
-                label="Tháng"
-                items={MONTH_LABELS}
-                value={wheelMonth}
-                onChange={(nextMonth) => {
-                  const nextMonthNumber = Number(nextMonth);
-                  const maxDay = new Date(wheelYearNumber, nextMonthNumber, 0).getDate();
-                  const safeDay = clamp(Number(wheelDay), 1, maxDay);
-                  const nextValue = toDateStr(
-                    new Date(wheelYearNumber, nextMonthNumber - 1, safeDay),
-                  );
-
-                  setWheelMonth(nextMonth);
-                  setWheelDay(pad2(safeDay));
-                  onChange(nextValue);
-                }}
-              />
-
-              <WheelColumn
-                label="Năm"
-                items={wheelYearItems}
-                value={wheelYear}
-                onChange={(nextYear) => {
-                  const nextYearNumber = Number(nextYear);
-                  const maxDay = new Date(nextYearNumber, wheelMonthNumber, 0).getDate();
-                  const safeDay = clamp(Number(wheelDay), 1, maxDay);
-                  const nextValue = toDateStr(
-                    new Date(nextYearNumber, wheelMonthNumber - 1, safeDay),
-                  );
-
-                  setWheelYear(nextYear);
-                  setWheelDay(pad2(safeDay));
-                  onChange(nextValue);
-                }}
-              />
-            </div>
-
-            <div className="mt-4 flex gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  const today = new Date();
-                  const todayValue = toDateStr(today);
-                  setWheelDay(pad2(today.getDate()));
-                  setWheelMonth(pad2(today.getMonth() + 1));
-                  setWheelYear(String(today.getFullYear()));
-                  onChange(todayValue);
-                }}
-                className="flex-1 rounded-full bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100"
-              >
-                Hôm nay
-              </button>
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/25 p-3 sm:items-center sm:p-6"
+          onClick={() => setOpen(false)}
+        >
+          <div
+            className="w-full max-w-4xl overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3 border-b border-neutral-100 px-4 py-4">
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-400">
+                  {label}
+                </p>
+                <h3 className="mt-1 text-lg font-bold text-neutral-900">
+                  Chọn ngày
+                </h3>
+              </div>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="flex-1 rounded-full border border-neutral-200 bg-white px-4 py-3 text-sm font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-800"
+                aria-label="Đóng"
               >
-                Xong
+                ×
               </button>
+            </div>
+
+            <div className="px-4 pb-4 pt-3">
+              <div className="grid grid-cols-3 gap-2">
+                <WheelColumn
+                  label="Ngày"
+                  items={Array.from({ length: wheelDaysInMonth }, (_, index) =>
+                    pad2(index + 1),
+                  )}
+                  value={wheelDay}
+                  onChange={(nextDay) => {
+                    const nextDayNumber = Number(nextDay);
+                    const safeDay = clamp(nextDayNumber, 1, wheelDaysInMonth);
+                    const nextValue = toDateStr(
+                      new Date(wheelYearNumber, wheelMonthNumber - 1, safeDay),
+                    );
+
+                    setWheelDay(pad2(safeDay));
+                    onChange(nextValue);
+                  }}
+                />
+
+                <WheelColumn
+                  label="Tháng"
+                  items={MONTH_LABELS}
+                  value={wheelMonth}
+                  onChange={(nextMonth) => {
+                    const nextMonthNumber = Number(nextMonth);
+                    const maxDay = new Date(wheelYearNumber, nextMonthNumber, 0).getDate();
+                    const safeDay = clamp(Number(wheelDay), 1, maxDay);
+                    const nextValue = toDateStr(
+                      new Date(wheelYearNumber, nextMonthNumber - 1, safeDay),
+                    );
+
+                    setWheelMonth(nextMonth);
+                    setWheelDay(pad2(safeDay));
+                    onChange(nextValue);
+                  }}
+                />
+
+                <WheelColumn
+                  label="Năm"
+                  items={wheelYearItems}
+                  value={wheelYear}
+                  onChange={(nextYear) => {
+                    const nextYearNumber = Number(nextYear);
+                    const maxDay = new Date(nextYearNumber, wheelMonthNumber, 0).getDate();
+                    const safeDay = clamp(Number(wheelDay), 1, maxDay);
+                    const nextValue = toDateStr(
+                      new Date(nextYearNumber, wheelMonthNumber - 1, safeDay),
+                    );
+
+                    setWheelYear(nextYear);
+                    setWheelDay(pad2(safeDay));
+                    onChange(nextValue);
+                  }}
+                />
+              </div>
+
+              <div className="mt-4 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const today = new Date();
+                    const todayValue = toDateStr(today);
+                    setWheelDay(pad2(today.getDate()));
+                    setWheelMonth(pad2(today.getMonth() + 1));
+                    setWheelYear(String(today.getFullYear()));
+                    onChange(todayValue);
+                  }}
+                  className="flex-1 rounded-full bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100"
+                >
+                  Hôm nay
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="flex-1 rounded-full border border-neutral-200 bg-white px-4 py-3 text-sm font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
+                >
+                  Xong
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -789,6 +815,43 @@ export default function ShelfLifeCalc({
                       >
                         {result.remainingPercentage > DOMESTIC_THRESHOLD
                           ? "Đạt chuẩn"
+                          : `Tối thiểu ${DOMESTIC_THRESHOLD}%`}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="hidden sm:block w-full mt-4">
+                  <div className="grid grid-cols-1 gap-2 text-left">
+                    <div className="flex items-center justify-between rounded-lg bg-neutral-50 px-4 py-3">
+                      <span className="text-neutral-500">
+                        Hàng nhập khẩu
+                      </span>
+                      <span
+                        className={`font-semibold ${
+                          result.remainingPercentage >= IMPORTED_THRESHOLD
+                            ? "text-emerald-600"
+                            : "text-amber-700"
+                        }`}
+                      >
+                        {result.remainingPercentage >= IMPORTED_THRESHOLD
+                          ? `Đạt chuẩn`
+                          : `Tối thiểu ${IMPORTED_THRESHOLD}%`}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between rounded-lg bg-neutral-50 px-4 py-3">
+                      <span className="text-neutral-500">
+                        Hàng nội địa
+                      </span>
+                      <span
+                        className={`font-semibold ${
+                          result.remainingPercentage > DOMESTIC_THRESHOLD
+                            ? "text-emerald-600"
+                            : "text-amber-700"
+                        }`}
+                      >
+                        {result.remainingPercentage > DOMESTIC_THRESHOLD
+                          ? `Đạt chuẩn`
                           : `Tối thiểu ${DOMESTIC_THRESHOLD}%`}
                       </span>
                     </div>

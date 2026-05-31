@@ -17,3 +17,11 @@
   --color-on-error-container: #93000a;
 }
 
+.wheel-scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.wheel-scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
