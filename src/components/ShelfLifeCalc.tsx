@@ -601,7 +601,7 @@ export default function ShelfLifeCalc({
 
                 {nsxMode === "specific" ? (
                   <DatePickerField
-                    label="Ngày sản xuất"
+                    label=""
                     value={nsxSpecific}
                     onChange={setNsxSpecific}
                   />
@@ -673,7 +673,7 @@ export default function ShelfLifeCalc({
 
                 {hsdMode === "specific" ? (
                   <DatePickerField
-                    label="Hạn sử dụng"
+                    label=""
                     value={hsdSpecific}
                     onChange={setHsdSpecific}
                   />
