@@ -199,11 +199,11 @@ export default function ShelfLifeCalc({
           <section className="bg-white p-4 sm:p-6 md:p-8 rounded-xl border border-neutral-200 shadow-sm relative overflow-hidden">
             {/* Form Title & Adjust System Date inline */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 sm:pb-6 border-b border-neutral-100 gap-3 sm:gap-4 mb-4 sm:mb-6">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="p-2 sm:p-3 bg-blue-50 rounded-xl text-blue-600">
-                  <Calendar className="w-5 h-5 sm:w-6 sm:h-6" />
+              <div className="flex items-start gap-2 sm:items-center sm:gap-3 min-w-0">
+                <div className="shrink-0 p-2 sm:p-3 bg-blue-50 rounded-xl text-blue-600">
+                  <Calendar className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-neutral-900 tracking-tight">
                     Máy tính Hạn sử dụng
                   </h2>
