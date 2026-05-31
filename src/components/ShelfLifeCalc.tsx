@@ -2,8 +2,8 @@
 import { Calendar, Clock, AlertTriangle } from "lucide-react";
 import { TimeUnit, ShelfLifeResult } from "../types";
 
-const IMPORTED_THRESHOLD = 70;
-const DOMESTIC_THRESHOLD = 50;
+const IMPORTED_THRESHOLD = 50;
+const DOMESTIC_THRESHOLD = 70;
 
 interface ShelfLifeCalcProps {
   currentDateStr: string;
@@ -267,11 +267,12 @@ export default function ShelfLifeCalc({
 
                 {nsxMode === "specific" ? (
                   <div className="relative">
+                    <Calendar className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-500" />
                     <input
                       type="date"
                       value={nsxSpecific}
                       onChange={(e) => setNsxSpecific(e.target.value)}
-                      className="w-full h-12 px-4 rounded-lg border border-neutral-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all text-neutral-800 bg-white font-mono shadow-inner-sm text-sm"
+                      className="w-full h-12 pl-11 pr-4 rounded-lg border border-neutral-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all text-neutral-800 bg-white font-mono shadow-inner-sm text-sm"
                     />
                   </div>
                 ) : (
@@ -342,11 +343,12 @@ export default function ShelfLifeCalc({
 
                 {hsdMode === "specific" ? (
                   <div className="relative">
+                    <Calendar className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-500" />
                     <input
                       type="date"
                       value={hsdSpecific}
                       onChange={(e) => setHsdSpecific(e.target.value)}
-                      className="w-full h-12 px-4 rounded-lg border border-neutral-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all text-neutral-800 bg-white font-mono shadow-inner-sm text-sm"
+                      className="w-full h-12 pl-11 pr-4 rounded-lg border border-neutral-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all text-neutral-800 bg-white font-mono shadow-inner-sm text-sm"
                     />
                   </div>
                 ) : (
