@@ -4,44 +4,42 @@ import path from 'path';
 import {defineConfig} from 'vite';
 import {VitePWA} from 'vite-plugin-pwa';
 
+import { cloudflare } from "@cloudflare/vite-plugin";
+
 export default defineConfig(() => {
   return {
-    plugins: [
-      react(),
-      tailwindcss(),
-      VitePWA({
-        registerType: 'autoUpdate',
-        includeAssets: ['favicon.svg', 'pwa-192x192.svg', 'pwa-512x512.svg'],
-        manifest: {
-          name: 'icat',
-          short_name: 'icat',
-          description: 'Ứng dụng tính hạn sử dụng và tính toán cơ bản cho kho vận.',
-          lang: 'vi',
-          theme_color: '#2563eb',
-          background_color: '#ffffff',
-          display: 'standalone',
-          start_url: '/',
-          scope: '/',
-          icons: [
-            {
-              src: '/pwa-192x192.svg',
-              sizes: '192x192',
-              type: 'image/svg+xml',
-              purpose: 'any',
-            },
-            {
-              src: '/pwa-512x512.svg',
-              sizes: '512x512',
-              type: 'image/svg+xml',
-              purpose: 'any maskable',
-            },
-          ],
-        },
-        devOptions: {
-          enabled: true,
-        },
-      }),
-    ],
+    plugins: [react(), tailwindcss(), VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.svg', 'pwa-192x192.svg', 'pwa-512x512.svg'],
+      manifest: {
+        name: 'icat',
+        short_name: 'icat',
+        description: 'Ứng dụng tính hạn sử dụng và tính toán cơ bản cho kho vận.',
+        lang: 'vi',
+        theme_color: '#2563eb',
+        background_color: '#ffffff',
+        display: 'standalone',
+        start_url: '/',
+        scope: '/',
+        icons: [
+          {
+            src: '/pwa-192x192.svg',
+            sizes: '192x192',
+            type: 'image/svg+xml',
+            purpose: 'any',
+          },
+          {
+            src: '/pwa-512x512.svg',
+            sizes: '512x512',
+            type: 'image/svg+xml',
+            purpose: 'any maskable',
+          },
+        ],
+      },
+      devOptions: {
+        enabled: true,
+      },
+    }), cloudflare()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
